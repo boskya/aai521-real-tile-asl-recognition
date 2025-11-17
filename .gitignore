@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Jupyter Notebook
+.ipynb_checkpoints
+*.ipynb_checkpoints/
+
+# Data (large files)
+data/raw/
+data/processed/
+*.zip
+*.tar.gz
+*.csv
+*.jpg
+*.png
+*.jpeg
+
+# Model checkpoints (large files)
+checkpoints/*.ckpt
+checkpoints/*.pth
+checkpoints/*.pt
+*.ckpt
+*.pth
+*.pt
+
+# Logs
+logs/
+*.log
+wandb/
+lightning_logs/
+tensorboard_logs/
+
+# Results (optional - you may want to commit small results)
+results/demo_videos/*.mp4
+results/demo_videos/*.avi
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+*.bak
+
+# Environment
+.env
+.env.local
+
+# Flask
+instance/
+.webassets-cache
