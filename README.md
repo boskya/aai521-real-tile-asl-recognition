@@ -212,3 +212,4 @@ This project is for educational purposes as part of the AAI-521 Computer Vision 
 
 - **Dataset:** Kaggle ASL Alphabet dataset by @grassknoted
 - **Cross-Dataset:** Ayuraj ASL Dataset by @ayuraj
+ **AI Development Assistant:** Claude (Anthropic) for code generation and debugging support
