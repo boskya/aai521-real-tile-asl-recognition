@@ -1,77 +1,214 @@
 # Real-Time ASL Alphabet Recognition
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![PyTorch](https://img.shields.io/badge/PyTorch-2.0+-red.svg)](https://pytorch.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+**University of San Diego - AAI-521 Computer Vision**  
+**Author:** Bosky Atlani  
+**Project:** Real-Time American Sign Language Alphabet Recognition with Cross-Dataset Evaluation
 
-## 📋 Project Overview
+---
 
-Real-time American Sign Language (ASL) alphabet recognition system using deep learning. 
-Recognizes 29 ASL gestures (A-Z + SPACE, DELETE, NOTHING) from webcam video at 20+ FPS.
+## Overview
 
-**Course:** AAI-521 Computer Vision  
-**Institution:** University of San Diego  
-**Author:** Bosky Atlani, Team 9
-**Date:** 2025
+This project implements a deep learning system for recognizing American Sign Language (ASL) alphabet gestures using transfer learning with EfficientNet-B0. The system includes model training, cross-dataset evaluation, and a real-time inference web application built with Streamlit.
 
-## 🎯 Key Features
+**Key Findings:**
+- Achieved 92.5% validation accuracy on in-distribution test data
+- Demonstrated significant generalization gap: 28.5% on cross-dataset evaluation, 60.7% on real-world webcam testing
+- Identified incompatible gesture definitions across different ASL datasets
+- Highlighted the critical importance of training data diversity for robust real-world deployment
 
-- EfficientNet-B0 transfer learning model
-- MediaPipe hand detection and isolation
-- ⚡ Real-time inference (20+ FPS)
-- 🎥 Live webcam demonstration
+---
 
+## Repository Structure
 
-## 📊 Results
+```
+aai521-real-time-asl-recognition/
+├── asl.ipynb          # Model training in Google Colab
+├── run_asl.py                       # Streamlit web application
+├── requirements.txt                 # Python dependencies
+└── README.md                        # This file
+```
 
-## 🚀 Quick Start
+Data, model and checkpoint results are saved on google drive. Please contact author for assitance with this. 
 
-### Installation
+---
+
+## Features
+
+### 1. Model Training (`asl.ipynb`)
+- **Architecture:** EfficientNet-B0 with transfer learning
+- **Dataset:** Kaggle ASL Alphabet (87,000 images, 29 classes)
+- **Two Training Strategies:**
+  - Model 1: Baseline (frozen base, no augmentation)
+  - Model 2: Enhanced (data augmentation + fine-tuning)
+- **Data Augmentation:** Rotation (±15°), zoom (±15%), brightness variation (±30%), spatial shifts
+- **Two-Stage Training:** Classifier-only → Full fine-tuning
+
+### 2. Cross-Dataset Evaluation (`cross_dataset_evaluation.ipynb`)
+- Tests model generalization on Ayuraj ASL dataset (1,815 images)
+- Generates confusion matrices and per-class accuracy analysis
+- Identifies gesture definition incompatibilities across datasets
+
+### 3. Real-Time Inference Application (`run_asl.py`)
+- **Web Interface:** Streamlit-based interactive application
+- **Hand Detection:** MediaPipe Hands with 21 landmark detection
+- **Preprocessing Pipeline:**
+  - Bounding box extraction with percentage-based padding
+  - Optional background segmentation
+  - EfficientNet preprocessing
+- **Testing Protocol:** Systematic data collection with CSV export
+- **Results Dashboard:** Real-time accuracy tracking per letter
+
+---
+
+## Installation
+
+### Prerequisites
+- Python 3.10 or 3.11 (Python 3.9 has compatibility issues)
+- GPU optional (works on CPU, Metal GPU on Mac)
+
+### Setup
 ```bash
+# Clone repository
+git clone https://github.com/boskya/aai521-real-time-asl-recognition.git
+cd aai521-real-time-asl-recognition
+
 # Create virtual environment
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+python3.10 -m venv venv
+
+# Activate virtual environment
+# Mac/Linux:
+source venv/bin/activate
+# Windows:
+venv\Scripts\activate
 
 # Install dependencies
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-### Download Data
-```bash
-# Download datasets from Kaggle
-bash scripts/download_data.sh
-
-# Or manually download:
-# 1. https://www.kaggle.com/datasets/grassknoted/asl-alphabet
-# Place in data/raw/
+### Dependencies
+```txt
+tensorflow==2.13.0          # Or tensorflow-macos for Apple Silicon
+streamlit==1.28.0
+opencv-python-headless==4.8.1.78
+mediapipe==0.10.8
+numpy<2.0                   # TensorFlow compatibility
+pillow==10.0.0
+pandas==2.0.3
+matplotlib==3.7.1
+seaborn==0.12.2
+scikit-learn==1.3.0
 ```
 
+---
 
-## 📁 Project Structure
+## Usage
 
-## 🎓 Methodology
+### Training Models (Google Colab)
 
-### Dataset
+1. Open `asl_training.ipynb` in Google Colab
+2. Mount Google Drive for model/checkpoint storage
+3. Download Kaggle ASL Alphabet dataset
+4. Run all cells to train Model 1 and Model 2
+5. Models saved to Google Drive
 
+
+### Real-Time Inference Application (Local)
+```bash
+# Ensure model file is in project directory
+# Download from Google Drive: asl_final_best.keras or asl_model_best.keras
+
+# Run Streamlit app
+streamlit run run_asl.py
+
+# Application opens in browser at http://localhost:8501
+```
+
+**Application Features:**
+- **Tab 1:** Upload/capture images for immediate prediction
+- **Tab 2:** Structured testing protocol (record correct/incorrect)
+- **Tab 3:** Results aggregation with per-letter accuracy
+- **Export:** Download results as CSV
+
+---
+
+
+## Technical Details
 
 ### Model Architecture
+```
+Input (224×224×3)
+    ↓
+EfficientNet-B0 (pretrained on ImageNet)
+    ↓
+GlobalAveragePooling2D
+    ↓
+Dropout(0.3)
+    ↓
+Dense(256, ReLU)
+    ↓
+Dropout(0.3)
+    ↓
+Dense(29, Softmax)
+```
 
-### Training
+### Preprocessing Pipeline
+1. **Hand Detection:** MediaPipe Hands (21 landmarks)
+2. **Bounding Box:** Percentage-based padding (50-100% of hand size)
+3. **Background Segmentation:** Convex hull mask with white background replacement
+4. **Resize:** 224×224 bilinear interpolation
+5. **Color Conversion:** BGR → RGB
+6. **Normalization:** EfficientNet `preprocess_input` (ImageNet statistics)
 
-### Real-Time Pipeline
-1. Capture webcam frame (30 FPS)
-2. MediaPipe hand detection
-3. Crop to hand bounding box
-4. Resize to 224×224 and normalize
-5. EfficientNet-B0 inference
-6. Majority voting (5-frame buffer)
-7. Display prediction
+### Classes (29 total)
+A-Z, SPACE, DELETE, NOTHING
 
-## 📈 Performance
+---
 
-### Offline Evaluation
+## Datasets
 
-### Real-World Testing
+### Kaggle ASL Alphabet (Training)
+- **Size:** 87,000 images (200×200 RGB)
+- **Classes:** 29
+- **Characteristics:** Uniform backgrounds, consistent lighting, centered composition
+- **Split:** 80% train, 20% validation
+- **Source:** [Kaggle ASL Alphabet](https://www.kaggle.com/datasets/grassknoted/asl-alphabet)
 
-### Robustness Analysis
+### Ayuraj ASL Dataset (Cross-Dataset Testing)
+- **Size:** 1,815 images
+- **Classes:** 26 (alphabet only)
+- **Characteristics:** Varied backgrounds, different hand orientations, inconsistent lighting
+- **Source:** [Kaggle Ayuraj ASL Dataset](https://www.kaggle.com/datasets/ayuraj/asl-dataset)
 
+**Note:** Datasets not included in repository due to size. Download separately from Kaggle.
+
+---
+
+## Known Issues & Limitations
+
+### Technical Issues
+- **Python 3.9 Compatibility:** Use Python 3.10+ to avoid TensorFlow/NumPy conflicts
+
+### Performance Limitations
+- **Overfitting to Training Distribution:** Model learned dataset-specific patterns (backgrounds, lighting)
+- **Incompatible Gesture Definitions:** 10+ letters use different hand configurations in Ayuraj vs. Kaggle
+- **Webcam Sensitivity:** Performance degrades with cluttered backgrounds, poor lighting, non-frontal orientations
+- **Bounding Box Cropping:** Tight crops may cut off fingers; requires careful padding adjustment
+
+### Deployment Considerations
+- Real-world accuracy (60.7%) significantly below validation accuracy (92.5%)
+- Requires training conditions to be matched for reliable predictions
+- Background segmentation helps but doesn't solve fundamental domain shift
+
+---
+
+## License
+
+This project is for educational purposes as part of the AAI-521 Computer Vision course at the University of San Diego.
+
+---
+
+## Acknowledgments
+
+- **Dataset:** Kaggle ASL Alphabet dataset by @grassknoted
+- **Cross-Dataset:** Ayuraj ASL Dataset by @ayuraj
